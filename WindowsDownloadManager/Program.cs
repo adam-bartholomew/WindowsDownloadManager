@@ -29,51 +29,71 @@ namespace WindowsDownloadManager
             string[] audioExts = { ".mp3", ".flac", ".wav", ".aiff", ".m4a", ".wma", ".aac" };
             string[] pictExts = { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".psd" };
             string[] execExts = { ".exe", ".msi", ".jar", ".bat", ".cmd", ".run", ".bin", ".app", ".x86", ".com", 
-                ".sh", ".script", ".ps1", ".ba_", ".prg", ".osx", ".csh",  };
+                ".sh", ".script", ".ps1", ".ba_", ".prg", ".osx", ".csh" };
 
-            int fileCount = downloads.GetFiles().Length;
+            int fileCount = 0;
             foreach(FileInfo file in downloads.GetFiles())
             {
                 if (file.Name == "desktop.ini") 
                 {
-                    fileCount--;
                     continue; 
                 }
-                Console.WriteLine(file);
                 if (docExts.Any(x => file.Extension.ToLower() == x))
                 {
                     if (!documentDir.Exists) { documentDir.Create(); }
-                    file.MoveTo($@"C:\Users\adamb\Downloads\Documents\{file.Name}");
+                    fileCount += MoveFile(file, @"C:\Users\adamb\Downloads\Documents\");
                 }
                 if (videoExts.Any(x => file.Extension.ToLower() == x))
                 {
                     if (!videoDir.Exists) { videoDir.Create(); }
-                    file.MoveTo($@"C:\Users\adamb\Downloads\Videos\{file.Name}");
+                    fileCount += MoveFile(file, @"C:\Users\adamb\Downloads\Videos\");
+                    
                 }
                 if (audioExts.Any(x => file.Extension.ToLower() == x))
                 {
                     if (!audioDir.Exists) { audioDir.Create(); }
-                    file.MoveTo($@"C:\Users\adamb\Downloads\Audio\{file.Name}");
+                    fileCount += MoveFile(file, @"C:\Users\adamb\Downloads\Audio\");
                 }
                 if (pictExts.Any(x => file.Extension.ToLower() == x))
                 {
                     if (!pictureDir.Exists) { pictureDir.Create(); }
-                    file.MoveTo($@"C:\Users\adamb\Downloads\Pictures\{file.Name}");
+                    fileCount += MoveFile(file, @"C:\Users\adamb\Downloads\Pictures\");
                 }
                 if (execExts.Any(x => file.Extension.ToLower() == x))
                 {
                     if (!executableDir.Exists) { executableDir.Create(); }
-                    file.MoveTo($@"C:\Users\adamb\Downloads\Executables\{file.Name}");
+                    fileCount += MoveFile(file, @"C:\Users\adamb\Downloads\Executables\");
                 }
                 if (file.Extension.ToLower() == ".zip")
                 {
                     if (!zipDir.Exists) { zipDir.Create(); }
-                    file.MoveTo($@"C:\Users\adamb\Downloads\Zips\{file.Name}");
+                    fileCount += MoveFile(file, @"C:\Users\adamb\Downloads\Zips\");
                 }
             }
-            Console.WriteLine($"Moved {fileCount} file(s).");
+            Console.WriteLine($"Organized {fileCount} file(s).");
             Console.WriteLine("WindowsDownloadManager Complete.");
             Console.ReadLine();
+        }
+
+        private static int MoveFile(FileInfo fInfo, String destinationPath)
+        {
+            try
+            {
+                fInfo.MoveTo($@"{destinationPath}{fInfo.Name}");
+                Console.WriteLine($@"Moved {fInfo.Name} to [{destinationPath}{fInfo.Name}]");
+                return 1;
+            }
+            catch (IOException)
+            {
+                Console.WriteLine($@"Overwriting [{destinationPath}{fInfo.Name}] with [{fInfo.FullName}]");
+                fInfo.CopyTo($@"{destinationPath}{fInfo.Name}", true);
+                fInfo.Delete();
+                return 0;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
         }
     }
 }
