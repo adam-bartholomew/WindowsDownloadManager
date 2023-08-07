@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WindowsDownloadManager
 {
@@ -12,18 +8,23 @@ namespace WindowsDownloadManager
     {
         static void Main(string[] args)
         {
+            // Set console window.
             Console.Clear();
             Console.SetWindowPosition(0, 0);
             Console.SetCursorPosition(0, 0);
+            Console.SetWindowSize(170, 30);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            
+            // Get needed directories.
+            DirectoryInfo downloadDir = new DirectoryInfo($@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\\Downloads");
+            DirectoryInfo documentDir = new DirectoryInfo($@"{downloadDir.FullName}\Documents");
+            DirectoryInfo videoDir = new DirectoryInfo($@"{downloadDir.FullName}\Videos");
+            DirectoryInfo audioDir = new DirectoryInfo($@"{downloadDir.FullName}\Audio");
+            DirectoryInfo pictureDir = new DirectoryInfo($@"{downloadDir.FullName}\Pictures");
+            DirectoryInfo executableDir = new DirectoryInfo($@"{downloadDir.FullName}\Executables");
+            DirectoryInfo zipDir = new DirectoryInfo($@"{downloadDir.FullName}\Zips_and_Dirs");
 
-            DirectoryInfo downloads = new DirectoryInfo(@"C:\Users\adamb\Downloads");
-            DirectoryInfo documentDir = new DirectoryInfo(@"C:\Users\adamb\Downloads\Documents");
-            DirectoryInfo videoDir = new DirectoryInfo(@"C:\Users\adamb\Downloads\Videos");
-            DirectoryInfo audioDir = new DirectoryInfo(@"C:\Users\adamb\Downloads\Audio");
-            DirectoryInfo pictureDir = new DirectoryInfo(@"C:\Users\adamb\Downloads\Pictures");
-            DirectoryInfo executableDir = new DirectoryInfo(@"C:\Users\adamb\Downloads\Executables");
-            DirectoryInfo zipDir = new DirectoryInfo(@"C:\Users\adamb\Downloads\Zips_and_Dirs");
-
+            // Different document extension types.
             string[] docExts = { ".pdf", ".doc", ".docx", ".txt" };
             string[] videoExts = { ".mp4", ".flv", ".m4v", "mpg", "mpeg", "amv", ".mov", ".avi", ".gifv", ".webm" };
             string[] audioExts = { ".mp3", ".flac", ".wav", ".aiff", ".m4a", ".wma", ".aac" };
@@ -35,7 +36,7 @@ namespace WindowsDownloadManager
             int fileCount = 0;
             int dirCount = 0;
 
-            foreach(FileInfo file in downloads.GetFiles())
+            foreach(FileInfo file in downloadDir.GetFiles())
             {
                 if (file.Name == "desktop.ini") 
                 {
@@ -43,37 +44,37 @@ namespace WindowsDownloadManager
                 }
                 if (docExts.Any(x => file.Extension.ToLower() == x))
                 {
-                    if (!documentDir.Exists) { documentDir.Create(); }
+                    CreateDir(documentDir);
                     fileCount += MoveFile(file, $@"{documentDir}\");
                 }
                 if (videoExts.Any(x => file.Extension.ToLower() == x))
                 {
-                    if (!videoDir.Exists) { videoDir.Create(); }
+                    CreateDir(videoDir);
                     fileCount += MoveFile(file, $@"{videoDir}\");
                 }
                 if (audioExts.Any(x => file.Extension.ToLower() == x))
                 {
-                    if (!audioDir.Exists) { audioDir.Create(); }
+                    CreateDir(audioDir);
                     fileCount += MoveFile(file, $@"{audioDir}\");
                 }
                 if (pictExts.Any(x => file.Extension.ToLower() == x))
                 {
-                    if (!pictureDir.Exists) { pictureDir.Create(); }
+                    CreateDir(pictureDir);
                     fileCount += MoveFile(file, $@"{pictureDir}\");
                 }
                 if (execExts.Any(x => file.Extension.ToLower() == x))
                 {
-                    if (!executableDir.Exists) { executableDir.Create(); }
+                    CreateDir(executableDir);
                     fileCount += MoveFile(file, $@"{executableDir}\");
                 }
                 if (file.Extension.ToLower() == ".zip")
                 {
-                    if (!zipDir.Exists) { zipDir.Create(); }
+                    CreateDir(zipDir);
                     fileCount += MoveFile(file, $@"{zipDir}\");
                 }
             }
 
-            foreach (DirectoryInfo dir in downloads.GetDirectories())
+            foreach (DirectoryInfo dir in downloadDir.GetDirectories())
             {
                 if (!allowedDirs.Any(d => dir.Name == d))
                 {
@@ -86,6 +87,12 @@ namespace WindowsDownloadManager
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// This method moves the provided file to the given location.
+        /// </summary>
+        /// <param name="fInfo">The file to move.</param>
+        /// <param name="destinationPath">The new location of the file.</param>
+        /// <returns>An integer representing whether the file was moved or not.</returns>
         private static int MoveFile(FileInfo fInfo, string destinationPath)
         {
             try
@@ -94,6 +101,7 @@ namespace WindowsDownloadManager
                 Console.WriteLine($@"Moved file - {fInfo.FullName} to [{destinationPath}{fInfo.Name}]");
                 return 1;
             }
+            // File already exists in target location - overwrite.
             catch (IOException)
             {
                 Console.WriteLine($@"Overwriting - [{destinationPath}{fInfo.Name}] with [{fInfo.FullName}]");
@@ -107,6 +115,12 @@ namespace WindowsDownloadManager
             }
         }
 
+        /// <summary>
+        /// This method moves the provided directory to the given location.
+        /// </summary>
+        /// <param name="dInfo">The directory to move.</param>
+        /// <param name="destinationPath">The new location of the directory.</param>
+        /// <returns>An integer representing whether the directory was moved or not.</returns>
         private static int MoveDir(DirectoryInfo dInfo, string destinationPath)
         {
             try
@@ -115,6 +129,7 @@ namespace WindowsDownloadManager
                 Console.WriteLine($@"Moved directory - {dInfo.FullName} to [{destinationPath}{dInfo.Name}]");
                 return 1;
             }
+            // Directory already exists in target location - replace.
             catch (IOException)
             {
                 Console.WriteLine($@"Overwriting directory - [{destinationPath}{dInfo.Name}] with [{dInfo.FullName}]");
@@ -126,6 +141,19 @@ namespace WindowsDownloadManager
             catch (Exception)
             {
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// This method will create a directory if needed.
+        /// </summary>
+        /// <param name="newDir">The directory name to check and create.</param>
+        private static void CreateDir(DirectoryInfo newDir)
+        {
+            if (newDir != null && !newDir.Exists)
+            {
+                newDir.Create();
+                Console.WriteLine($@"Created missing directory: {newDir.FullName}");
             }
         }
     }
