@@ -35,6 +35,8 @@ namespace WindowsDownloadManager
             
             int fileCount = 0;
             int dirCount = 0;
+            long bytesRunningTotal = 0;
+            string bytesMoved;
 
             foreach(FileInfo file in downloadDir.GetFiles())
             {
@@ -45,32 +47,44 @@ namespace WindowsDownloadManager
                 if (docExts.Any(x => file.Extension.ToLower() == x))
                 {
                     CreateDir(documentDir);
-                    fileCount += MoveFile(file, $@"{documentDir}\");
+                    int fileMoved = MoveFile(file, $@"{documentDir}\");
+                    fileCount += fileMoved;
+                    bytesRunningTotal += fileMoved > 0 ? file.Length : 0;
                 }
                 if (videoExts.Any(x => file.Extension.ToLower() == x))
                 {
                     CreateDir(videoDir);
-                    fileCount += MoveFile(file, $@"{videoDir}\");
+                    int fileMoved = MoveFile(file, $@"{videoDir}\");
+                    fileCount += fileMoved;
+                    bytesRunningTotal += fileMoved > 0 ? file.Length : 0;
                 }
                 if (audioExts.Any(x => file.Extension.ToLower() == x))
                 {
                     CreateDir(audioDir);
-                    fileCount += MoveFile(file, $@"{audioDir}\");
+                    int fileMoved = MoveFile(file, $@"{audioDir}\");
+                    fileCount += fileMoved;
+                    bytesRunningTotal += fileMoved > 0 ? file.Length : 0;
                 }
                 if (pictExts.Any(x => file.Extension.ToLower() == x))
                 {
                     CreateDir(pictureDir);
-                    fileCount += MoveFile(file, $@"{pictureDir}\");
+                    int fileMoved = MoveFile(file, $@"{pictureDir}\");
+                    fileCount += fileMoved;
+                    bytesRunningTotal += fileMoved > 0 ? file.Length : 0;
                 }
                 if (execExts.Any(x => file.Extension.ToLower() == x))
                 {
                     CreateDir(executableDir);
-                    fileCount += MoveFile(file, $@"{executableDir}\");
+                    int fileMoved = MoveFile(file, $@"{executableDir}\");
+                    fileCount += fileMoved;
+                    bytesRunningTotal += fileMoved > 0 ? file.Length : 0;
                 }
                 if (file.Extension.ToLower() == ".zip")
                 {
                     CreateDir(zipDir);
-                    fileCount += MoveFile(file, $@"{zipDir}\");
+                    int fileMoved = MoveFile(file, $@"{zipDir}\");
+                    fileCount += fileMoved;
+                    bytesRunningTotal += fileMoved > 0 ? file.Length : 0;
                 }
             }
 
@@ -82,7 +96,9 @@ namespace WindowsDownloadManager
                 }
             }
 
-            Console.WriteLine($"Organized {fileCount} file(s) and {dirCount} directory/directories");
+            bytesMoved = FormatBytes(bytesRunningTotal);
+
+            Console.WriteLine($"\nOrganized {fileCount} file(s) and {dirCount} directory/directories | {bytesMoved}");
             Console.WriteLine("WindowsDownloadManager Complete.");
             Console.ReadLine();
         }
@@ -92,7 +108,7 @@ namespace WindowsDownloadManager
         /// </summary>
         /// <param name="fInfo">The file to move.</param>
         /// <param name="destinationPath">The new location of the file.</param>
-        /// <returns>An integer representing whether the file was moved or not.</returns>
+        /// <returns>An integer representing whether the file was fileMoved or not.</returns>
         private static int MoveFile(FileInfo fInfo, string destinationPath)
         {
             try
@@ -120,7 +136,7 @@ namespace WindowsDownloadManager
         /// </summary>
         /// <param name="dInfo">The directory to move.</param>
         /// <param name="destinationPath">The new location of the directory.</param>
-        /// <returns>An integer representing whether the directory was moved or not.</returns>
+        /// <returns>An integer representing whether the directory was fileMoved or not.</returns>
         private static int MoveDir(DirectoryInfo dInfo, string destinationPath)
         {
             try
@@ -155,6 +171,41 @@ namespace WindowsDownloadManager
                 newDir.Create();
                 Console.WriteLine($@"Created missing directory: {newDir.FullName}");
             }
+        }
+
+        /// <summary>
+        /// Calculates the human readable size of bytes.
+        /// </summary>
+        /// <param name="length">The number of bytes</param>
+        /// <returns>A formatted string representation of the total byte size.</returns>
+        private static string FormatBytes(long length)
+        {
+            long B, KB = 1024, MB = KB * 1024, GB = MB * 1024, TB = GB * 1024;
+            double size = length;
+            string suffix = nameof(B);
+
+            if (length >= TB)
+            {
+                size = Math.Round((double)length / TB, 2);
+                suffix = nameof(TB);
+            }
+            else if (length >= GB)
+            {
+                size = Math.Round((double)length / GB, 2);
+                suffix = nameof(GB);
+            }
+            else if (length >= MB)
+            {
+                size = Math.Round((double)length / MB, 2);
+                suffix = nameof(MB);
+            }
+            else if (length >= KB)
+            {
+                size = Math.Round((double)length / KB, 2);
+                suffix = nameof(KB);
+            }
+
+            return $"{size} {suffix}";
         }
     }
 }
