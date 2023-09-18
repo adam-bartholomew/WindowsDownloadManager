@@ -14,7 +14,8 @@ namespace WindowsDownloadManager
             Console.SetCursorPosition(0, 0);
             Console.SetWindowSize(170, 30);
             Console.ForegroundColor = ConsoleColor.Cyan;
-            
+            Console.WriteLine($"Windows Downloads Manager Starting: [{DateTime.Now}]");
+
             // Get needed directories.
             DirectoryInfo downloadDir = new DirectoryInfo($@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\\Downloads");
             DirectoryInfo documentDir = new DirectoryInfo($@"{downloadDir.FullName}\Documents");
@@ -99,7 +100,7 @@ namespace WindowsDownloadManager
             bytesMoved = FormatBytes(bytesRunningTotal);
 
             Console.WriteLine($"\nOrganized {fileCount} file(s) and {dirCount} directory/directories | {bytesMoved}");
-            Console.WriteLine("WindowsDownloadManager Complete.");
+            Console.WriteLine($"Windows Downloads Manager Finished: [{DateTime.Now}]");
             Console.ReadLine();
         }
 
