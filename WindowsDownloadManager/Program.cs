@@ -26,7 +26,7 @@ namespace WindowsDownloadManager
             DirectoryInfo zipDir = new DirectoryInfo($@"{downloadDir.FullName}\Zips_and_Dirs");
 
             // Different document extension types.
-            string[] docExts = { ".pdf", ".doc", ".docx", ".txt" };
+            string[] docExts = { ".pdf", ".doc", ".docx", ".txt", ".odt" };
             string[] videoExts = { ".mp4", ".flv", ".m4v", "mpg", "mpeg", "amv", ".mov", ".avi", ".gifv", ".webm" };
             string[] audioExts = { ".mp3", ".flac", ".wav", ".aiff", ".m4a", ".wma", ".aac" };
             string[] pictExts = { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".psd" };
